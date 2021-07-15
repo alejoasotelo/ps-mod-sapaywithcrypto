@@ -24,9 +24,12 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
 
 class Sapaywithcrypto extends PaymentModule
 {
@@ -81,13 +84,14 @@ class Sapaywithcrypto extends PaymentModule
 
         include(dirname(__FILE__).'/sql/install.php');
 
+        
+        Configuration::updateValue(self::FLAG_DISPLAY_PAYMENT_INVITE, true);
+
         return parent::install() &&
             $this->registerHook('header') &&
             $this->registerHook('backOfficeHeader') &&
             $this->registerHook('paymentOptions') &&
-            $this->registerHook('actionPaymentConfirmation') &&
-            $this->registerHook('displayPayment') &&
-            $this->registerHook('displayPaymentReturn');
+            $this->registerHook('paymentReturn');
     }
 
     public function uninstall()
@@ -242,6 +246,10 @@ class Sapaywithcrypto extends PaymentModule
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
     }
 
+    public function hookPaymentReturn() {
+
+    }
+
     /**
      * Return payment options available for PS 1.7+
      *
@@ -251,6 +259,7 @@ class Sapaywithcrypto extends PaymentModule
      */
     public function hookPaymentOptions($params)
     {
+        // Ver modulo de ejemplo https://github.com/PrestaShop/paymentexample
         if (!$this->active) {
             return;
         }
@@ -258,7 +267,7 @@ class Sapaywithcrypto extends PaymentModule
             return;
         }
         $option = new \PrestaShop\PrestaShop\Core\Payment\PaymentOption();
-        $option->setCallToActionText($this->l('Pay offline'))
+        $option->setCallToActionText($this->l('Pay with Crypto'))
             ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true));
 
         return [
@@ -278,20 +287,5 @@ class Sapaywithcrypto extends PaymentModule
             }
         }
         return false;
-    }
-
-    public function hookActionPaymentConfirmation()
-    {
-        /* Place your code here. */
-    }
-
-    public function hookDisplayPayment()
-    {
-        /* Place your code here. */
-    }
-
-    public function hookDisplayPaymentReturn()
-    {
-        /* Place your code here. */
     }
 }
